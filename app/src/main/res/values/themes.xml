@@ -1,0 +1,10 @@
+<resources>
+
+    <style name="Theme.Core2" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">#ffc35c</item>
+        <item name="colorSecondary">#ffc35c</item>
+        <item name="android:background">#2b2b2b</item>
+        <item name="android:navigationBarColor">#2b2b2b</item>
+        <item name="android:statusBarColor">#2b2b2b</item>
+    </style>
+</resources>
