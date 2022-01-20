@@ -60,12 +60,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             }
         }
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.answerReloadFlow.collect {
-                    updateViewFromRes(it)
-                    it.onData(Fun { navigateToList() })
-                }
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            viewModel.answerReloadFlow.collect {
+                updateViewFromRes(it)
+                it.onData(Fun { navigateToList() })
             }
         }
     }
