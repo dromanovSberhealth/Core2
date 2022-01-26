@@ -8,14 +8,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.kondachok.core2.core.Load
 import ru.kondachok.core2.core.State
-import ru.kondachok.core2.core.SuspendUseCase
 import ru.kondachok.core2.core.dataOrNull
 import ru.kondachok.core2.core.flow.StateFlowBuilder
+import ru.kondachok.core2.sample.data.GetAnswersUseCase
 import ru.kondachok.core2.sample.domian.Answer
 
 @HiltViewModel
 class ListViewModel @Inject constructor(
-    getAnswersUseCase: SuspendUseCase<Boolean, List<Answer>>,
+    getAnswersUseCase: GetAnswersUseCase,
     stateFlowBuilder: StateFlowBuilder
 ) : ViewModel() {
 

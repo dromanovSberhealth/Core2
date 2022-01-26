@@ -9,14 +9,14 @@ import ru.kondachok.core2.core.UseCase
 
 abstract class FlowUseCase<IN, OUT>(
     private val fx: Fun<IN, OUT>,
-    private val beforeFx: Fun<State<OUT?>, State<OUT?>?>? = null,
-    private val onResponseFx: Fun<OUT?, State<OUT?>?>? = null,
-    private val afterFx: Fun<State<OUT?>, State<OUT?>?>? = null,
-    private val errorFx: Fun<Throwable, State<OUT?>?>? = null,
-    private val finallyFx: Fun<Unit, State<OUT?>?>? = null
+    private val beforeFx: Fun<State<OUT>, State<OUT>?>? = null,
+    private val onResponseFx: Fun<OUT, State<OUT>?>? = null,
+    private val afterFx: Fun<State<OUT>, State<OUT>?>? = null,
+    private val errorFx: Fun<Throwable, State<OUT>?>? = null,
+    private val finallyFx: Fun<Unit, State<OUT>?>? = null
 ) : UseCase<IN, Unit> {
 
-    abstract val value: State<OUT?>
+    abstract val value: State<OUT>
 
     override fun invoke(arg: IN) {
         try {
@@ -33,5 +33,5 @@ abstract class FlowUseCase<IN, OUT>(
         }
     }
 
-    abstract fun updateState(state: State<OUT?>)
+    abstract fun updateState(state: State<OUT>)
 }

@@ -10,18 +10,18 @@ import ru.kondachok.core2.core.State
 
 class StateStateFlow<IN, OUT>(
     fx: Fun<IN, OUT>,
-    beforeFx: Fun<State<OUT?>, State<OUT?>?>? = null,
-    onResponseFx: Fun<OUT?, State<OUT?>?>? = null,
-    afterFx: Fun<State<OUT?>, State<OUT?>?>? = null,
-    errorFx: Fun<Throwable, State<OUT?>?>? = null,
-    finallyFx: Fun<Unit, State<OUT?>?>? = null
+    beforeFx: Fun<State<OUT>, State<OUT>?>? = null,
+    onResponseFx: Fun<OUT, State<OUT>?>? = null,
+    afterFx: Fun<State<OUT>, State<OUT>?>? = null,
+    errorFx: Fun<Throwable, State<OUT>?>? = null,
+    finallyFx: Fun<Unit, State<OUT>?>? = null
 ) : FlowUseCase<IN, OUT>(fx, beforeFx, onResponseFx, afterFx, errorFx, finallyFx),
-    StateFlow<State<OUT?>> {
+    StateFlow<State<OUT>> {
 
-    // Аналогично MutableStateFlow<State<OUT?>>, но
+    // Аналогично MutableStateFlow<State<OUT>>, но
     // не MutableStateFlow потому что при быстром emit значений и одинаковым финальтым значением
     // может не произойти обновление значения
-    private val flow = MutableSharedFlow<State<OUT?>>(
+    private val flow = MutableSharedFlow<State<OUT>>(
         replay = 1,
         extraBufferCapacity = 0,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
@@ -29,17 +29,17 @@ class StateStateFlow<IN, OUT>(
         tryEmit(Init)
     }
 
-    override val replayCache: List<State<OUT?>>
+    override val replayCache: List<State<OUT>>
         get() = flow.replayCache
 
-    override val value: State<OUT?>
+    override val value: State<OUT>
         get() = flow.replayCache.first()
 
-    override suspend fun collect(collector: FlowCollector<State<OUT?>>): Nothing {
+    override suspend fun collect(collector: FlowCollector<State<OUT>>): Nothing {
         flow.collect(collector)
     }
 
-    override fun updateState(state: State<OUT?>) {
+    override fun updateState(state: State<OUT>) {
         flow.tryEmit(state)
     }
 }

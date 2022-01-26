@@ -31,7 +31,7 @@ fun interface SuspendFun<IN, OUT> {
  * @param OUT
  * @constructor Create empty Use case
  */
-fun interface UseCase<IN, OUT> : Fun<IN, OUT>
+interface UseCase<IN, OUT> : Fun<IN, OUT>
 
 /**
  * Suspend use case - глобальный функциональный интерфейс отвечающий для декларации suspend действий
@@ -41,7 +41,7 @@ fun interface UseCase<IN, OUT> : Fun<IN, OUT>
  * @param OUT
  * @constructor Create empty Suspend use case
  */
-fun interface SuspendUseCase<IN, OUT> : SuspendFun<IN, OUT>
+interface SuspendUseCase<IN, OUT> : SuspendFun<IN, OUT>
 
 
 /**
@@ -52,7 +52,7 @@ fun interface SuspendUseCase<IN, OUT> : SuspendFun<IN, OUT>
  * @param OUT
  * @constructor Create empty Data mapper
  */
-fun interface DataMapper<IN, OUT> : Fun<IN, OUT>
+interface DataMapper<IN, OUT> : Fun<IN, OUT>
 
 /**
  * Suspend data mapper - глобальный функциональный интерфейс отвечающий за преобразования
@@ -62,7 +62,7 @@ fun interface DataMapper<IN, OUT> : Fun<IN, OUT>
  * @param OUT
  * @constructor Create empty Suspend data mapper
  */
-fun interface SuspendDataMapper<IN, OUT> : SuspendFun<IN, OUT>
+interface SuspendDataMapper<IN, OUT> : SuspendFun<IN, OUT>
 
 
 /**

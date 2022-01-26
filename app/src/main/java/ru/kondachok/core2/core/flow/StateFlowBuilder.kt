@@ -5,6 +5,7 @@ import javax.inject.Singleton
 import ru.kondachok.core2.core.Fun
 import ru.kondachok.core2.core.State
 import ru.kondachok.core2.core.SuspendFun
+import ru.kondachok.core2.core.SuspendUseCase
 import ru.kondachok.core2.core.flow.suspendeusecase.SuspendStateChannelFlow
 import ru.kondachok.core2.core.flow.suspendeusecase.SuspendStateStateFlow
 import ru.kondachok.core2.core.flow.usecase.StateChannelFlow
@@ -23,46 +24,46 @@ class StateFlowBuilder @Inject constructor() {
 
     class Builder<IN, OUT>(private var fx: Fun<IN, OUT>) {
 
-        private var beforeFx: Fun<State<OUT?>, State<OUT?>?>? = null
-        private var onResponseFx: Fun<OUT?, State<OUT?>?>? = null
-        private var afterFx: Fun<State<OUT?>, State<OUT?>?>? = null
-        private var errorFx: Fun<Throwable, State<OUT?>?>? = null
-        private var finallyFx: Fun<Unit, State<OUT?>?>? = null
+        private var beforeFx: Fun<State<OUT>, State<OUT>?>? = null
+        private var onResponseFx: Fun<OUT, State<OUT>?>? = null
+        private var afterFx: Fun<State<OUT>, State<OUT>?>? = null
+        private var errorFx: Fun<Throwable, State<OUT>?>? = null
+        private var finallyFx: Fun<Unit, State<OUT>?>? = null
 
-        fun beforeState(fx: Fun<State<OUT?>, State<OUT?>?>) = this.apply {
+        fun beforeState(fx: Fun<State<OUT>, State<OUT>?>) = this.apply {
             this.beforeFx = fx
         }
 
-        fun before(fx: Fun<State<OUT?>, Unit>) = this.apply {
+        fun before(fx: Fun<State<OUT>, Unit>) = this.apply {
             this.beforeFx = Fun {
                 fx.invoke(it)
                 null
             }
         }
 
-        fun onResponseState(fx: Fun<OUT?, State<OUT?>?>) = this.apply {
+        fun onResponseState(fx: Fun<OUT, State<OUT>?>) = this.apply {
             this.onResponseFx = fx
         }
 
-        fun onResponse(fx: Fun<OUT?, Unit>) = this.apply {
+        fun onResponse(fx: Fun<OUT, Unit>) = this.apply {
             this.onResponseFx = Fun {
                 fx.invoke(it)
                 null
             }
         }
 
-        fun afterState(fx: Fun<State<OUT?>, State<OUT?>?>) = this.apply {
+        fun afterState(fx: Fun<State<OUT>, State<OUT>?>) = this.apply {
             this.afterFx = fx
         }
 
-        fun after(fx: Fun<State<OUT?>, Unit>) = this.apply {
+        fun after(fx: Fun<State<OUT>, Unit>) = this.apply {
             this.afterFx = Fun {
                 fx.invoke(it)
                 null
             }
         }
 
-        fun errorState(fx: Fun<Throwable, State<OUT?>?>) = this.apply {
+        fun errorState(fx: Fun<Throwable, State<OUT>?>) = this.apply {
             this.errorFx = fx
         }
 
@@ -73,7 +74,7 @@ class StateFlowBuilder @Inject constructor() {
             }
         }
 
-        fun finallyState(fx: Fun<Unit, State<OUT?>?>) = this.apply {
+        fun finallyState(fx: Fun<Unit, State<OUT>?>) = this.apply {
             this.finallyFx = fx
         }
 
@@ -109,46 +110,46 @@ class StateFlowBuilder @Inject constructor() {
 
     class SuspendBuilder<IN, OUT: Any?>(private var fx: SuspendFun<IN, OUT>) {
 
-        private var beforeFun: SuspendFun<State<OUT?>, State<OUT?>?>? = null
-        private var onResponseFun: SuspendFun<OUT?, State<OUT?>?>? = null
-        private var afterFun: SuspendFun<State<OUT?>, State<OUT?>?>? = null
-        private var errorFun: SuspendFun<Throwable, State<OUT?>?>? = null
-        private var finallyFun: SuspendFun<Unit, State<OUT?>?>? = null
+        private var beforeFun: SuspendFun<State<OUT>, State<OUT>?>? = null
+        private var onResponseFun: SuspendFun<OUT, State<OUT>?>? = null
+        private var afterFun: SuspendFun<State<OUT>, State<OUT>?>? = null
+        private var errorFun: SuspendFun<Throwable, State<OUT>?>? = null
+        private var finallyFun: SuspendFun<Unit, State<OUT>?>? = null
 
-        fun beforeState(fx: SuspendFun<State<OUT?>, State<OUT?>?>) = this.apply {
+        fun beforeState(fx: SuspendFun<State<OUT>, State<OUT>?>) = this.apply {
             this.beforeFun = fx
         }
 
-        fun before(fx: SuspendFun<State<OUT?>, Unit>) = this.apply {
+        fun before(fx: SuspendFun<State<OUT>, Unit>) = this.apply {
             this.beforeFun = SuspendFun {
                 fx.invoke(it)
                 null
             }
         }
 
-        fun onResponseState(fx: SuspendFun<OUT?, State<OUT?>?>) = this.apply {
+        fun onResponseState(fx: SuspendFun<OUT, State<OUT>?>) = this.apply {
             this.onResponseFun = fx
         }
 
-        fun onResponse(fx: Fun<OUT?, Unit>) = this.apply {
+        fun onResponse(fx: Fun<OUT, Unit>) = this.apply {
             this.onResponseFun = SuspendFun {
                 fx.invoke(it)
                 null
             }
         }
 
-        fun afterState(fx: SuspendFun<State<OUT?>, State<OUT?>?>) = this.apply {
+        fun afterState(fx: SuspendFun<State<OUT>, State<OUT>?>) = this.apply {
             this.afterFun = fx
         }
 
-        fun after(fx: SuspendFun<State<OUT?>, Unit>) = this.apply {
+        fun after(fx: SuspendFun<State<OUT>, Unit>) = this.apply {
             this.afterFun = SuspendFun {
                 fx.invoke(it)
                 null
             }
         }
 
-        fun errorState(fx: SuspendFun<Throwable, State<OUT?>?>) = this.apply {
+        fun errorState(fx: SuspendFun<Throwable, State<OUT>?>) = this.apply {
             this.errorFun = fx
         }
 
@@ -159,7 +160,7 @@ class StateFlowBuilder @Inject constructor() {
             }
         }
 
-        fun finallyState(fx: SuspendFun<Unit, State<OUT?>?>) = this.apply {
+        fun finallyState(fx: SuspendFun<Unit, State<OUT>?>) = this.apply {
             this.finallyFun = fx
         }
 

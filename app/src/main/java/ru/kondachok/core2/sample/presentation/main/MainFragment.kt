@@ -5,18 +5,15 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import by.kirich1409.viewbindingdelegate.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import ru.kondachok.core2.R
 import ru.kondachok.core2.core.Fun
-import ru.kondachok.core2.core.Res
+import ru.kondachok.core2.core.Resource
 import ru.kondachok.core2.core.isLoad
+import ru.kondachok.core2.core.on
 import ru.kondachok.core2.core.onData
-import ru.kondachok.core2.core.onReq
 import ru.kondachok.core2.databinding.FragmentMainBinding
 import ru.kondachok.core2.sample.presentation.custom.CustomFragment
 import ru.kondachok.core2.sample.presentation.list.ListFragment
@@ -52,7 +49,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         viewLifecycleOwner.lifecycleScope.launchWhenCreated {
             viewModel.answerFlow.collect {
                 updateViewFromRes(it)
-                it.onReq(
+                it.on(
                     data = ::updateAnswerText,
                     error = { updateAnswerText("Произошла ошибка, ответа нет!") },
                     cancel = { updateAnswerText("Вопрос отменен!") }
@@ -68,16 +65,16 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
-    private fun<T> updateViewFromRes(res: Res<T>) {
-        binding.progress.isVisible = res.isLoad
-        binding.answer.isVisible = !res.isLoad
-        binding.btAnswersLoad.isEnabled = !res.isLoad
-        binding.btAnswersNoLoad.isEnabled = !res.isLoad
-        binding.btCustom.isEnabled = !res.isLoad
+    private fun <T> updateViewFromRes(resource: Resource<T>) {
+        binding.progress.isVisible = resource.isLoad
+        binding.answer.isVisible = !resource.isLoad
+        binding.btAnswersLoad.isEnabled = !resource.isLoad
+        binding.btAnswersNoLoad.isEnabled = !resource.isLoad
+        binding.btCustom.isEnabled = !resource.isLoad
     }
 
-    private fun updateAnswerText(string: String) {
-        binding.answer.text = string
+    private fun updateAnswerText(it: String?) {
+        binding.answer.text = it
     }
 
     private fun navigateToList() {

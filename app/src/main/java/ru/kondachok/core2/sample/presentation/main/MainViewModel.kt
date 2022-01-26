@@ -10,20 +10,22 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import ru.kondachok.core2.core.DataMapper
-import ru.kondachok.core2.core.Res
+import ru.kondachok.core2.core.Fun
+import ru.kondachok.core2.core.Resource
 import ru.kondachok.core2.core.SuspendFun
 import ru.kondachok.core2.core.SuspendUseCase
 import ru.kondachok.core2.core.UseCase
-import ru.kondachok.core2.core.asOtherRes
 import ru.kondachok.core2.core.flow.StateFlowBuilder
-import ru.kondachok.core2.core.reqRes
+import ru.kondachok.core2.core.map
+import ru.kondachok.core2.core.requiredResource
+import ru.kondachok.core2.sample.data.CleanAnswersUseCase
+import ru.kondachok.core2.sample.data.GetAnswersUseCase
 import ru.kondachok.core2.sample.domian.Answer
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val clearAnswersUseCase: UseCase<Unit, Unit>,
-    getAnswersUseCase: SuspendUseCase<Boolean, List<Answer>>,
+    private val clearAnswersUseCase: CleanAnswersUseCase,
+    getAnswersUseCase: GetAnswersUseCase,
     stateFlowBuilder: StateFlowBuilder
 ) : ViewModel() {
 
@@ -43,24 +45,25 @@ class MainViewModel @Inject constructor(
         .buildStateFlow()
 
     private val answersReloadRes = stateFlowBuilder
-        .from(SuspendFun<Boolean, List<Answer>> {
+        .from(SuspendFun<Boolean, List<Answer>?> { arg ->
             delay(2000) // тестовая задержка
-            getAnswersUseCase.invoke(it)
+            getAnswersUseCase.invoke(arg)
         })
         .buildChannelFlow()
 
-    val answerFlow: Flow<Res<String?>> = answersRes
+    val answerFlow: Flow<Resource<String?>> = answersRes
         .map { state ->
-            state.reqRes().asOtherRes(DataMapper { it?.get(Random.nextInt(it.size))?.text })
+            state.requiredResource().map(Fun { it?.get(Random.nextInt(it.size))?.text })
         }
 
-    val answerReloadFlow: Flow<Res<Unit?>> = answersReloadRes.map { it.reqRes().asOtherRes(Unit) }
+    val answerReloadFlow: Flow<Resource<Unit?>> = answersReloadRes.map { it.requiredResource().map(Unit) }
 
     fun onAnswerClicked() = viewModelScope.launch {
         answersRes.invoke(false)
     }
     // проверка CancellationException()
     //.cancel()
+
 
     fun onNoLoadClicked() {
         clearAnswersUseCase.invoke(Unit)

@@ -33,28 +33,31 @@ class IntToStrSuspendDataMapper: SuspendDataMapper<Int, String> {
     override suspend fun invoke(arg: Int): String = arg.toString()
 }
 
-val defMapper = DataMapper<Int, String> { it.toString() }
-val defSuspendMapper = SuspendDataMapper<Int, String> { it.toString() }
+//val defMapper = DataMapper<Int, String> { it.toString() }
+//val defSuspendMapper = SuspendDataMapper<Int, String> { it.toString() }
+
+fun intToStr(param: Int): String = param.toString()
 
 fun main() {
     // примеры не перегружаемых функций
     notOverloadFun { it.toString() }
     notOverloadFun(Fun { it.toString() })
-    notOverloadFun(DataMapper { it.toString() })
-    notOverloadFun(defMapper)
+//    notOverloadFun(DataMapper { it.toString() })
+//    notOverloadFun(defMapper)
     notOverloadFun(IntToStrDataMapper())
+    notOverloadFun(::intToStr)
 
     // примеры перегружаемого кода
 
     overloadFun(Fun { it.toString() })
-    overloadFun(DataMapper { it.toString() })
-    overloadFun(defMapper)
+//    overloadFun(DataMapper { it.toString() })
+//    overloadFun(defMapper)
     overloadFun(IntToStrDataMapper())
 
     GlobalScope.launch {
         overloadFun(SuspendFun { it.toString() })
-        overloadFun(SuspendDataMapper {  it.toString() })
-        overloadFun(defSuspendMapper)
+//        overloadFun(SuspendDataMapper {  it.toString() })
+//        overloadFun(defSuspendMapper)
         overloadFun(IntToStrSuspendDataMapper())
     }
 }

@@ -19,7 +19,7 @@ interface State<out T>
  * @param T
  * @return
  */
-inline fun <T, reified K : State<T?>> State<T?>.isA(): Boolean {
+inline fun <T, reified K : State<T>> State<T>.isA(): Boolean {
     return this is K
 }
 
@@ -31,7 +31,7 @@ inline fun <T, reified K : State<T?>> State<T?>.isA(): Boolean {
  * @param T
  * @return
  */
-inline fun <T, reified K : State<T?>> State<T?>.reqAs(): K {
+inline fun <T, reified K : State<T>> State<T>.requiredAs(): K {
     return if (this is K) this else throw ClassCastException("$this is not ${K::class}")
 }
 
@@ -56,7 +56,7 @@ interface ViewState : State<Nothing>
  * @param T
  * @constructor Create empty Res
  */
-sealed class Res<out T> : State<T>
+sealed class Resource<out T> : State<T>
 
 // Init Res
 
@@ -65,12 +65,12 @@ sealed class Res<out T> : State<T>
  *
  * @constructor Create empty Init
  */
-object Init : Res<Nothing>()
+object Init : Resource<Nothing>()
 
 /**
  * Is init - возвращает резульат проверки, является ли текущий объект классом Init
  */
-val <T> State<T?>.isInit: Boolean
+val <T> State<T>.isInit: Boolean
     get() = this.isA<T, Init>()
 
 /**
@@ -80,7 +80,7 @@ val <T> State<T?>.isInit: Boolean
  * @param T
  * @param block
  */
-fun <T> State<T?>.onInit(block: Fun<Unit, Unit>) {
+fun <T> State<T>.onInit(block: Fun<Unit, Unit>) {
     if (this is Init) block.invoke(Unit)
 }
 
@@ -91,7 +91,7 @@ fun <T> State<T?>.onInit(block: Fun<Unit, Unit>) {
  * @param T
  * @param block
  */
-suspend fun <T> State<T?>.onInit(block: SuspendFun<Unit, Unit>) {
+suspend fun <T> State<T>.onInit(block: SuspendFun<Unit, Unit>) {
     if (this is Init) block.invoke(Unit)
 }
 
@@ -102,12 +102,12 @@ suspend fun <T> State<T?>.onInit(block: SuspendFun<Unit, Unit>) {
  *
  * @constructor Create empty Load
  */
-object Load : Res<Nothing>()
+object Load : Resource<Nothing>()
 
 /**
  * Is Load - возвращает резульат проверки, является ли текущий объект классом Load
  */
-val <T> State<T?>.isLoad: Boolean
+val <T> State<T>.isLoad: Boolean
     get() = this.isA<T, Load>()
 
 /**
@@ -117,7 +117,7 @@ val <T> State<T?>.isLoad: Boolean
  * @param T
  * @param block
  */
-fun <T> State<T?>.onLoad(block: Fun<Unit, Unit>) {
+fun <T> State<T>.onLoad(block: Fun<Unit, Unit>) {
     if (this is Load) block.invoke(Unit)
 }
 
@@ -128,7 +128,7 @@ fun <T> State<T?>.onLoad(block: Fun<Unit, Unit>) {
  * @param T
  * @param block
  */
-suspend fun <T> State<T?>.onLoad(block: SuspendFun<Unit, Unit>) {
+suspend fun <T> State<T>.onLoad(block: SuspendFun<Unit, Unit>) {
     if (this is Load) block.invoke(Unit)
 }
 
@@ -141,38 +141,12 @@ suspend fun <T> State<T?>.onLoad(block: SuspendFun<Unit, Unit>) {
  * @property data - возвращаемые данные
  * @constructor Create empty Data
  */
-data class Data<out T>(private var data: T?) : Res<T?>() {
-
-    /**
-     * Is empty - возвращает результат о наличии пустых данных
-     */
-    val isEmpty: Boolean
-        get() = data == null
-
-    /**
-     * Is empty - возвращает результат о наличии не пустых данных
-     */
-    val isNotEmpty: Boolean
-        get() = data != null
-
-    /**
-     * Value - возвращает nullabe значение данных
-     */
-    val value: T?
-        get() = data
-
-    /**
-     * Required value - возвращает рекомендованное, не пустое значение
-     * , в противном случе выбрасывает NullPointerException
-     */
-    val reqValue: T
-        get() = data ?: throw NullPointerException("Required data is empty from: $this")
-}
+data class Data<T>(var value: T) : Resource<T>()
 
 /**
  * Is data - возвращает резульат проверки, является ли текущий объект классом Data от типа T
  */
-val <T> State<T?>.isData: Boolean
+val <T> State<T>.isData: Boolean
     get() = this.isA<T, Data<T>>()
 
 /**
@@ -182,19 +156,8 @@ val <T> State<T?>.isData: Boolean
  * @param T
  * @param block
  */
-fun <T> State<T?>.onData(block: Fun<T?, Unit>) {
+fun <T> State<T>.onData(block: Fun<T, Unit>) {
     if (this is Data<T>) block.invoke(this.value)
-}
-
-/**
- * On Required data  - выполняет функцию, указанную в блоке Fun
- * , если текущий объект является классом Data от типа T и имеет не пустое значение
- *
- * @param T
- * @param block
- */
-fun <T> State<T?>.onReqData(block: Fun<T, Unit>) {
-    if (this is Data<T> && this.isNotEmpty) block.invoke(this.reqValue)
 }
 
 /**
@@ -204,19 +167,8 @@ fun <T> State<T?>.onReqData(block: Fun<T, Unit>) {
  * @param T
  * @param block
  */
-suspend fun <T> State<T?>.onData(block: SuspendFun<T?, Unit>) {
+suspend fun <T> State<T>.onData(block: SuspendFun<T, Unit>) {
     if (this is Data<T>) block.invoke(this.value)
-}
-
-/**
- * On Required data  - выполняет suspend функцию, указанную в блоке SuspendFun
- * , если текущий объект является классом Data от типа T и имеет не пустое значение
- *
- * @param T
- * @param block
- */
-suspend fun <T> State<T?>.onReqData(block: SuspendFun<T, Unit>) {
-    if (this is Data<T> && this.isNotEmpty) block.invoke(this.reqValue)
 }
 
 /**
@@ -225,7 +177,7 @@ suspend fun <T> State<T?>.onReqData(block: SuspendFun<T, Unit>) {
  * @param T
  * @return
  */
-fun <T> State<T?>.dataOrNull(): T? {
+fun <T> State<T>.dataOrNull(): T? {
     return if (this is Data<T>) this.value else null
 }
 
@@ -238,12 +190,12 @@ fun <T> State<T?>.dataOrNull(): T? {
  * @property throwable - возвращаемая ошибка
  * @constructor Create empty Error
  */
-data class Error<out T>(val throwable: Throwable) : Res<T>()
+data class Error<out T>(val throwable: Throwable) : Resource<T>()
 
 /**
  * Is error - возвращает резульат проверки, является ли текущий объект классом Error от типа T
  */
-val <T> State<T?>.isError: Boolean
+val <T> State<T>.isError: Boolean
     get() = this.isA<T, Error<T>>()
 
 /**
@@ -253,8 +205,8 @@ val <T> State<T?>.isError: Boolean
  * @param T
  * @param block
  */
-fun <T> State<T?>.onError(block: Fun<Throwable, Unit>) {
-    if (this is Error<T?>) block.invoke(this.throwable)
+fun <T> State<T>.onError(block: Fun<Throwable, Unit>) {
+    if (this is Error<T>) block.invoke(this.throwable)
 }
 
 /**
@@ -264,8 +216,8 @@ fun <T> State<T?>.onError(block: Fun<Throwable, Unit>) {
  * @param T
  * @param block
  */
-suspend fun <T> State<T?>.onError(block: SuspendFun<Throwable, Unit>) {
-    if (this is Error<T?>) block.invoke(this.throwable)
+suspend fun <T> State<T>.onError(block: SuspendFun<Throwable, Unit>) {
+    if (this is Error<T>) block.invoke(this.throwable)
 }
 
 /**
@@ -274,8 +226,8 @@ suspend fun <T> State<T?>.onError(block: SuspendFun<Throwable, Unit>) {
  * @param T
  * @return
  */
-fun <T> State<T?>.errorOrNull(): Throwable? {
-    return if (this is Error<T?>) this.throwable else null
+fun <T> State<T>.errorOrNull(): Throwable? {
+    return if (this is Error<T>) this.throwable else null
 }
 
 // Null Res
@@ -285,12 +237,12 @@ fun <T> State<T?>.errorOrNull(): Throwable? {
  *
  * @constructor Create empty Cancel
  */
-object Cancel : Res<Nothing>()
+object Cancel : Resource<Nothing>()
 
 /**
  * Is cancel - возвращает резульат проверки, является ли текущий объект классом Cancel
  */
-val <T> State<T?>.isCancel: Boolean
+val <T> State<T>.isCancel: Boolean
     get() = this.isA<T, Cancel>()
 
 /**
@@ -300,7 +252,7 @@ val <T> State<T?>.isCancel: Boolean
  * @param T
  * @param block
  */
-fun <T> State<T?>.onCancel(block: Fun<Unit, Unit>) {
+fun <T> State<T>.onCancel(block: Fun<Unit, Unit>) {
     if (this is Cancel) block.invoke(Unit)
 }
 
@@ -311,7 +263,7 @@ fun <T> State<T?>.onCancel(block: Fun<Unit, Unit>) {
  * @param T
  * @param block
  */
-suspend fun <T> State<T?>.onCancel(block: SuspendFun<Unit, Unit>) {
+suspend fun <T> State<T>.onCancel(block: SuspendFun<Unit, Unit>) {
     if (this is Cancel) block.invoke(Unit)
 }
 
@@ -323,8 +275,8 @@ suspend fun <T> State<T?>.onCancel(block: SuspendFun<Unit, Unit>) {
  * @param T
  * @return
  */
-fun <T> State<T?>.reqRes(): Res<T?> {
-    return this.reqAs()
+fun <T> State<T>.requiredResource(): Resource<T> {
+    return this.requiredAs()
 }
 
 /**
@@ -337,34 +289,7 @@ fun <T> State<T?>.reqRes(): Res<T?> {
  * @param data
  * @param error
  */
-fun <T> Res<T?>.on(
-    init: Fun<Unit, Unit> = Fun {},
-    load: Fun<Unit, Unit> = Fun {},
-    cancel: Fun<Unit, Unit> = Fun {},
-    data: Fun<T?, Unit> = Fun {},
-    error: Fun<Throwable, Unit> = Fun {},
-) {
-    when (this) {
-        is Init -> init.invoke(Unit)
-        is Load -> load.invoke(Unit)
-        is Cancel -> cancel.invoke(Unit)
-        is Data -> data.invoke(this.value)
-        is Error -> error.invoke(this.throwable)
-    }
-}
-
-/**
- * On req - выполняет указанную функцию, в зависимости от текущего состояния ресурса
- * с непустыми данными
- *
- * @param T
- * @param init
- * @param load
- * @param cancel
- * @param data
- * @param error
- */
-fun <T> Res<T?>.onReq(
+fun <T> Resource<T>.on(
     init: Fun<Unit, Unit> = Fun {},
     load: Fun<Unit, Unit> = Fun {},
     cancel: Fun<Unit, Unit> = Fun {},
@@ -375,7 +300,7 @@ fun <T> Res<T?>.onReq(
         is Init -> init.invoke(Unit)
         is Load -> load.invoke(Unit)
         is Cancel -> cancel.invoke(Unit)
-        is Data -> if (this.isNotEmpty) data.invoke(this.reqValue)
+        is Data -> data.invoke(this.value)
         is Error -> error.invoke(this.throwable)
     }
 }
@@ -390,11 +315,11 @@ fun <T> Res<T?>.onReq(
  * @param data
  * @param error
  */
-suspend fun <T> Res<T?>.on(
+suspend fun <T> Resource<T>.on(
     init: SuspendFun<Unit, Unit> = SuspendFun {},
     load: SuspendFun<Unit, Unit> = SuspendFun {},
     cancel: Fun<Unit, Unit> = Fun {},
-    data: SuspendFun<T?, Unit> = SuspendFun {},
+    data: SuspendFun<T, Unit> = SuspendFun {},
     error: SuspendFun<Throwable, Unit> = SuspendFun {},
 ) {
     when (this) {
@@ -407,33 +332,6 @@ suspend fun <T> Res<T?>.on(
 }
 
 /**
- * On req - выполняет указанную suspend функцию, в зависимости от текущего состояния ресурса
- * с непустыми данными
- *
- * @param T
- * @param init
- * @param load
- * @param cancel
- * @param data
- * @param error
- */
-suspend fun <T> Res<T?>.onReq(
-    init: SuspendFun<Unit, Unit> = SuspendFun {},
-    load: SuspendFun<Unit, Unit> = SuspendFun {},
-    cancel: Fun<Unit, Unit> = Fun {},
-    data: SuspendFun<T, Unit> = SuspendFun {},
-    error: SuspendFun<Throwable, Unit> = SuspendFun {},
-) {
-    when (this) {
-        is Init -> init.invoke(Unit)
-        is Load -> load.invoke(Unit)
-        is Cancel -> cancel.invoke(Unit)
-        is Data -> if (this.isNotEmpty) data.invoke(this.reqValue)
-        is Error -> error.invoke(this.throwable)
-    }
-}
-
-/**
  * As other res - приводит текущий ресурс к ресурсу с новыми данными
  *
  * @param T
@@ -441,7 +339,7 @@ suspend fun <T> Res<T?>.onReq(
  * @param data
  * @return
  */
-fun <T, N> Res<T?>.asOtherRes(data: N?): Res<N?> {
+fun <T, N> Resource<T>.map(data: N): Resource<N> {
     return when (this) {
         is Init -> Init
         is Load -> Load
@@ -459,7 +357,7 @@ fun <T, N> Res<T?>.asOtherRes(data: N?): Res<N?> {
  * @param mapper
  * @return
  */
-fun <T, N> Res<T?>.asOtherRes(mapper: Fun<T?, N?>): Res<N?> {
+fun <T, N> Resource<T>.map(mapper: Fun<T, N>): Resource<N> {
     return when (this) {
         is Init -> Init
         is Load -> Load
@@ -477,7 +375,7 @@ fun <T, N> Res<T?>.asOtherRes(mapper: Fun<T?, N?>): Res<N?> {
  * @param mapper
  * @return
  */
-suspend fun <T, N> Res<T?>.asOtherRes(mapper: SuspendFun<T?, N?>): Res<N?> {
+suspend fun <T, N> Resource<T>.map(mapper: SuspendFun<T, N>): Resource<N> {
     return when (this) {
         is Init -> Init
         is Load -> Load
